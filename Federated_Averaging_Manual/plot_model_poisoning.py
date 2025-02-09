@@ -10,7 +10,7 @@ sns.set(style="whitegrid")
 
 # Update the 'Scale Factor' column for display
 data['Scale Factor Label'] = data['Scale Factor'].apply(lambda x: f"{x} (No Model Poisoning)" if x == 1 else str(x))
-
+print(data)
 # Plot the accuracy against the number of rounds for different scale factors
 plt.figure(figsize=(12, 8))
 sns.lineplot(
@@ -26,12 +26,12 @@ plt.title("Global Accuracy vs Number of Rounds for Different Scale Factors")
 plt.xlabel("Number of Rounds")
 plt.ylabel("Global Accuracy")
 plt.legend(title="Scale Factor")
-plt.savefig("results/model_poisoning_plot.png")
-plt.show()
+plt.savefig("figures/model_poisoning_plot.png", dpi=300)
 
 # Calculate the moving average
-window = 5
+window = 10
 data['Moving Average'] = data.groupby('Scale Factor')['Global Accuracy'].transform(lambda x: x.rolling(window=window, min_periods=1).mean())
+# print(data.head(15))
 
 # Plot the moving average of accuracy against the number of rounds for different scale factors
 plt.figure(figsize=(12, 8))
@@ -48,4 +48,4 @@ plt.title("Global Accuracy (Moving Average) vs Number of Rounds for Different Sc
 plt.xlabel("Number of Rounds")
 plt.ylabel("Global Accuracy (Moving Average)")
 plt.legend(title="Scale Factor")
-plt.show()
+plt.savefig("figures/model_poisoning_moving_avg_plot.png", dpi=300)
