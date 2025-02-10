@@ -8,6 +8,8 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
+import random
+
 
 
 class Net(nn.Module):
@@ -33,10 +35,8 @@ class Net(nn.Module):
 
 fds = None  # Cache FederatedDataset
 
-
-def load_data(partition_id: int, num_partitions: int):
+def load_data(partition_id: int, num_partitions: int, poison_data: bool):
     """Load partition CIFAR10 data."""
-    # Only initialize `FederatedDataset` once
     global fds
     if fds is None:
         partitioner = IidPartitioner(num_partitions=num_partitions)
@@ -53,15 +53,20 @@ def load_data(partition_id: int, num_partitions: int):
     )
 
     def apply_transforms(batch):
-        """Apply transforms to the partition from FederatedDataset."""
+        """Apply transforms and flip labels if poison_data is True."""
         batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+        
+        if poison_data:
+            # Flip the label to a random different class (assuming 10 classes: 0 to 9)
+            batch["label"] = [random.randint(0, 9) for _ in batch["label"]]
+        
         return batch
 
     partition_train_test = partition_train_test.with_transform(apply_transforms)
     trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
     testloader = DataLoader(partition_train_test["test"], batch_size=32)
+    
     return trainloader, testloader
-
 
 def train(net, trainloader, epochs, device):
     """Train the model on the training set."""
