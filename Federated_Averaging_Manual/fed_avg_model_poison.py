@@ -8,6 +8,9 @@ from task import Net, load_data, train, test, get_weights, set_weights
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+global NUM_CLIENTS
+NUM_CLIENTS = 5  # Adjust this if needed
+
 def federated_avg(weights_list):
     """Compute federated averaging of model weights."""
     avg_weights = copy.deepcopy(weights_list[0])
@@ -25,18 +28,16 @@ def poison_model_weights(model_weights, scale_factor=1):
     print("Model poisoning applied.")
     return poisoned_weights
 
-def train_client(global_model, client_id, epochs, num_poisoned_clients, scale_factor):
+def train_client(global_model, data, client_id, epochs, num_poisoned_clients, scale_factor ):
     """Train the local model on a specific client, with optional model poisoning."""
     print(f"Training on client {client_id + 1}...")
     
-    # Load client-specific data
-    trainloader, _ = load_data(client_id, NUM_CLIENTS)
-    
+
     # Create a copy of the global model for this client
     local_model = copy.deepcopy(global_model)
     
     # Train the local model
-    train_loss = train(local_model, trainloader, epochs, DEVICE)
+    train_loss = train(local_model, data, epochs, DEVICE)
     
     # Apply model poisoning if the client_id is within the number of poisoned clients
     if client_id < num_poisoned_clients:
@@ -45,12 +46,10 @@ def train_client(global_model, client_id, epochs, num_poisoned_clients, scale_fa
     else:
         return local_model.state_dict(), train_loss
 
-def train_and_evaluate(num_rounds, epochs, writer, num_poisoned_clients, scale_factor):
+def train_and_evaluate(num_rounds, epochs, data, writer, num_poisoned_clients, scale_factor):
     """Simulate federated learning across multiple clients in parallel."""
     print(f"Training for {num_rounds} rounds for {epochs} epochs with {num_poisoned_clients} poisoned clients and scale factor {scale_factor}.")
 
-    global NUM_CLIENTS
-    NUM_CLIENTS = 5  # Adjust this if needed
 
     global_model = Net().to(DEVICE)
 
@@ -63,7 +62,7 @@ def train_and_evaluate(num_rounds, epochs, writer, num_poisoned_clients, scale_f
         # Train clients in parallel using ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=NUM_CLIENTS) as executor:
             futures = [
-                executor.submit(train_client, global_model, client_id, epochs, num_poisoned_clients, scale_factor)
+                executor.submit(train_client, global_model,  data[client_id], client_id, epochs, num_poisoned_clients, scale_factor)
                 for client_id in range(NUM_CLIENTS)
             ]
 
@@ -93,7 +92,15 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
-    with open("results/model_poison_results.csv", "w", newline="") as csvfile:
+    data = []
+
+    # Load data for all clients
+    for client_id in range(NUM_CLIENTS):
+        current_data, _ = load_data(client_id, NUM_CLIENTS)
+        data.append(current_data)
+    
+
+    with open("results/temp.csv", "w", newline="") as csvfile:
         fieldnames = ["Number of Rounds", "Number of Epochs", "Scale Factor",  "Round", "Global Accuracy"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
@@ -101,7 +108,7 @@ if __name__ == "__main__":
         for num_rounds in num_rounds_array:
             for epochs in epochs_array:
                 for scale_factor in scale_factor_array:
-                    train_and_evaluate(num_rounds, epochs, writer, num_poisoned_clients, scale_factor)
+                    train_and_evaluate(num_rounds, epochs, data, writer, num_poisoned_clients, scale_factor)
                     print("")
     
     end_time = time.time()
