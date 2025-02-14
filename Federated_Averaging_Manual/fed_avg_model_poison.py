@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed  # For parallel 
 from task import Net, load_data, train, test, get_weights, set_weights
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Training on {DEVICE}")
 
 global NUM_CLIENTS
 NUM_CLIENTS = 5  # Adjust this if needed
