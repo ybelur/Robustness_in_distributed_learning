@@ -22,11 +22,11 @@ sns.lineplot(
     palette="bright"
 )
 
-# Customize the plot
 plt.title("Global Accuracy vs Number of Rounds for Different Levels of Data Poisoning")
 plt.xlabel("Number of Rounds")
 plt.ylabel("Global Accuracy")
-plt.legend(title="Number of Poisoned Nodes")
+plt.legend(title="Number of Poisoned Nodes", bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
 plt.savefig("../figures/data_poisoning_plot.png", dpi=300)
 
 # Calculate the moving average
@@ -44,9 +44,9 @@ sns.lineplot(
     palette="bright"
 )
 
-# Customize the plot
 plt.title("Moving Average of Global Accuracy vs Number of Rounds for Different Levels of Data Poisoning")
 plt.xlabel("Number of Rounds")
 plt.ylabel("Moving Average of Global Accuracy")
-plt.legend(title="Number of Poisoned Nodes")
+plt.legend(title="Number of Poisoned Nodes", bbox_to_anchor=(1, 1), loc='upper left')
+plt.tight_layout()
 plt.savefig("../figures/data_poisoning_moving_avg_plot.png", dpi=300)

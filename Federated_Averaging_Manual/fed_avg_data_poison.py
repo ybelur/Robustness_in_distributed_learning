@@ -14,7 +14,7 @@ from task import Net, load_data, train, test, get_weights, set_weights
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Training on {DEVICE}")
 
-NUM_CLIENTS = 5  # Adjust this if needed
+NUM_CLIENTS = 10  # Adjust this if needed
 
 def federated_avg(weights_list):
     """Compute federated averaging of model weights."""
@@ -77,9 +77,9 @@ def train_and_evaluate(num_rounds, epochs, data, writer, num_poisoned_clients):
         writer.writerow({"Number of Rounds": num_rounds, "Number of Epochs": epochs, "Number of Poisoned Clients": num_poisoned_clients, "Round": rnd + 1, "Global Accuracy": global_accuracy})
 
 if __name__ == "__main__":
-    num_rounds_array = [50]
-    epochs_array = [4]
-    num_poisoned_clients_array = [0, 1, 2, 3, 4, 5]
+    num_rounds_array = [70]
+    epochs_array = [3]
+    num_poisoned_clients_array = [7, 8, 9, 10]
 
     start_time = time.time()
 
