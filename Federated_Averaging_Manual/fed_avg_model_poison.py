@@ -10,7 +10,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Training on {DEVICE}")
 
 global NUM_CLIENTS
-NUM_CLIENTS = 5  # Adjust this if needed
+NUM_CLIENTS = 10  # Adjust this if needed
 
 def federated_avg(weights_list):
     """Compute federated averaging of model weights."""
@@ -77,7 +77,7 @@ def train_and_evaluate(num_rounds, epochs, data, writer, num_poisoned_clients, s
         global_model.load_state_dict(avg_weights)
         
         # Test the global model
-        _, global_accuracy = test(global_model, load_data(0, NUM_CLIENTS)[1], DEVICE)
+        _, global_accuracy = test(global_model, load_data(0, NUM_CLIENTS, False)[1], DEVICE)
         avg_loss = np.mean(local_losses)
         
         print(f"Round {rnd + 1} results: avg loss = {avg_loss:.4f}, global accuracy = {global_accuracy:.4f}")
@@ -86,8 +86,8 @@ def train_and_evaluate(num_rounds, epochs, data, writer, num_poisoned_clients, s
         writer.writerow({"Number of Rounds": num_rounds, "Number of Epochs": epochs, "Scale Factor": scale_factor, "Round": rnd + 1, "Global Accuracy": global_accuracy})
 
 if __name__ == "__main__":
-    num_rounds_array = [50]
-    epochs_array = [4]
+    num_rounds_array = [70]
+    epochs_array = [3]
     scale_factor_array = [1, 2, 3, 4, 5]
     num_poisoned_clients = 1
 
@@ -97,11 +97,11 @@ if __name__ == "__main__":
 
     # Load data for all clients
     for client_id in range(NUM_CLIENTS):
-        current_data, _ = load_data(client_id, NUM_CLIENTS)
+        current_data, _ = load_data(client_id, NUM_CLIENTS, False)
         data.append(current_data)
     
 
-    with open("results/temp.csv", "w", newline="") as csvfile:
+    with open("results/model_poison_results.csv", "w", newline="") as csvfile:
         fieldnames = ["Number of Rounds", "Number of Epochs", "Scale Factor",  "Round", "Global Accuracy"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
