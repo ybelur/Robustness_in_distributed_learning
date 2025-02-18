@@ -93,43 +93,6 @@ def train_and_evaluate(num_rounds, epochs, data, writer, num_data_poisoned_clien
         
         writer.writerow({"Number of Rounds": num_rounds, "Number of Epochs": epochs, "Number of Data Poisoned Clients": num_data_poisoned_clients, "Number of Model Poisoned Clients": num_model_poisoned_clients, "Scale Factor": scale_factor, "Round": rnd + 1, "Global Accuracy": global_accuracy})
 
-# if __name__ == "__main__":
-#     num_rounds_array = [1]
-#     epochs_array = [1]
-#     num_data_poisoned_clients_array = [0]
-#     scale_factor_array = [5]
-#     num_model_poisoned_clients_array = [0]
-
-#     start_time = time.time()
-
-
-#     with open("results/data_poison_results.csv", "w", newline="") as csvfile:
-#         fieldnames = ["Number of Rounds", "Number of Epochs", "Number of Data Poisoned Clients", "Number of Model Poisoned Clients", "Scale Factor", "Round", "Global Accuracy"]
-#         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-#         writer.writeheader()
-
-       
-        
-#         for num_data_poisoned_clients in num_data_poisoned_clients_array:
-#             # Load data for all clients
-#             data = []
-#             for client_id in range(NUM_CLIENTS): 
-#                 current_data, _ = load_data(client_id, NUM_CLIENTS, (client_id < num_data_poisoned_clients))
-#                 data.append(current_data)
-
-#             for num_model_poisoned_clients in num_model_poisoned_clients_array:
-#                 for scale_factor in scale_factor_array:
-#                     for num_rounds in num_rounds_array:
-#                         for epochs in epochs_array:
-#                             train_and_evaluate(num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor)
-    
-#     end_time = time.time()
-#     elapsed_time = end_time - start_time
-
-#     print(f"Start time: {time.ctime(start_time)}, End time: {time.ctime(end_time)}")
-#     print(f"Elapsed time: {time.strftime('%d days, %H Hours %M Minutes %S Seconds', time.gmtime(elapsed_time))}")
-#     print("Federated training with data poisoning completed. Results saved in results/temp.csv.")
-
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Run federated training with data poisoning.")
     
