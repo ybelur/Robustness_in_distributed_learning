@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load the data
-file_path = "../results/no_attack_results_10_clients.csv"
+file_path = "../results/data_poison_results.csv"
 data = pd.read_csv(file_path)
 
 # Plot the data
@@ -22,8 +22,9 @@ sns.lineplot(
 plt.title("Global Accuracy vs Number of Rounds")
 plt.xlabel("Number of Rounds")
 plt.ylabel("Global Accuracy")
-plt.legend(title="Number of Epochs per Round", bbox_to_anchor=(1, 1), loc='upper left')
+plt.legend(title="Number of Epochs per Round", bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.savefig("../figures/no_attack_plot_10_clients.png", bbox_inches='tight', dpi=300)
+# plt.show()
 
 # Calculate the moving average
 window = 10
@@ -43,5 +44,6 @@ sns.lineplot(
 plt.title("Moving Average of Global Accuracy vs Number of Rounds")
 plt.xlabel("Number of Rounds")
 plt.ylabel("Moving Average of Global Accuracy")
-plt.legend(title="Number of Epochs per Round", bbox_to_anchor=(1, 1), loc='upper left')
+plt.legend(title="Number of Epochs per Round", bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.savefig("../figures/no_attack_moving_average_plot_10_clients.png", bbox_inches='tight', dpi=300)
+# plt.show()

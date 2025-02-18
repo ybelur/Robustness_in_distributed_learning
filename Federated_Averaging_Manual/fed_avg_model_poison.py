@@ -21,7 +21,7 @@ def federated_avg(weights_list):
         avg_weights[key] = avg_weights[key] / len(weights_list)
     return avg_weights
 
-def poison_model_weights(model_weights, scale_factor=1):
+def poison_model_weights(model_weights, scale_factor):
     """Introduce model poisoning by modifying the weights drastically."""
     poisoned_weights = copy.deepcopy(model_weights)
     for key in poisoned_weights.keys():
