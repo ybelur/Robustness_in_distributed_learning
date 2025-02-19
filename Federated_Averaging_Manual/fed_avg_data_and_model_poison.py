@@ -7,14 +7,11 @@ import csv
 import time
 import argparse
 
-from torch.utils.data import DataLoader, TensorDataset
 from concurrent.futures import ThreadPoolExecutor, as_completed 
 from task import Net, load_data, train, test, get_weights, set_weights
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Training on {DEVICE}")
-
-NUM_CLIENTS = 10  # Adjust this if needed
 
 def federated_avg(weights_list):
     """Compute federated averaging of model weights."""
@@ -52,11 +49,11 @@ def train_client(global_model, data, client_id, epochs, num_model_poisoned_clien
         return local_model.state_dict(), train_loss
 
 
-def train_and_evaluate(num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor):
+def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor):
     """Simulate federated learning across multiple clients in parallel."""
 
     print("Training with these parameters:")
-    print(f"Number of Rounds: {num_rounds}, Number of Epochs: {epochs}, Number of Data Poisoned Clients: {num_data_poisoned_clients}, Number of Model Poisoned Clients: {num_model_poisoned_clients}, Scale Factor: {scale_factor}")
+    print(f"Number of Clients: {num_clients}, Number of Rounds: {num_rounds}, Number of Epochs: {epochs}, Number of Data Poisoned Clients: {num_data_poisoned_clients}, Number of Model Poisoned Clients: {num_model_poisoned_clients}, Scale Factor: {scale_factor}")
 
     global_model = Net().to(DEVICE)
 
@@ -67,10 +64,10 @@ def train_and_evaluate(num_rounds, epochs, data, writer, num_data_poisoned_clien
         local_losses = []
 
         # Train clients in parallel using ThreadPoolExecutor
-        with ThreadPoolExecutor(max_workers=NUM_CLIENTS) as executor:
+        with ThreadPoolExecutor(max_workers=num_clients) as executor:
             futures = [
                 executor.submit(train_client, global_model, data[client_id], client_id, epochs, num_model_poisoned_clients, scale_factor)
-                for client_id in range(NUM_CLIENTS)
+                for client_id in range(num_clients)
             ]
 
             for future in as_completed(futures):
@@ -83,19 +80,18 @@ def train_and_evaluate(num_rounds, epochs, data, writer, num_data_poisoned_clien
         global_model.load_state_dict(avg_weights)
         
         # Test the global model
-        _, global_accuracy = test(global_model, load_data(0, NUM_CLIENTS, False)[1], DEVICE)
+        _, global_accuracy = test(global_model, load_data(0, num_clients, False)[1], DEVICE)
         avg_loss = np.mean(local_losses)
         
         print(f"Round {rnd + 1} results: avg loss = {avg_loss:.4f}, global accuracy = {global_accuracy:.4f}")
 
-        # Write round results to CSV
-        # writer.writerow({"Number of Rounds": num_rounds, "Number of Epochs": epochs, "Number of Poisoned Clients": num_data_poisoned_clients, "Round": rnd + 1, "Global Accuracy": global_accuracy})
-        
-        writer.writerow({"Number of Rounds": num_rounds, "Number of Epochs": epochs, "Number of Data Poisoned Clients": num_data_poisoned_clients, "Number of Model Poisoned Clients": num_model_poisoned_clients, "Scale Factor": scale_factor, "Round": rnd + 1, "Global Accuracy": global_accuracy})
+        # Write round results to CSV        
+        writer.writerow({"Number of Clients": num_clients, "Number of Rounds": num_rounds, "Number of Epochs": epochs, "Number of Data Poisoned Clients": num_data_poisoned_clients, "Number of Model Poisoned Clients": num_model_poisoned_clients, "Scale Factor": scale_factor, "Round": rnd + 1, "Global Accuracy": global_accuracy})
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Run federated training with data poisoning.")
     
+    parser.add_argument("--num_clients", type=str, required=True, help="Number of clients.")
     parser.add_argument("--csv_file", type=str, required=True, help="Path to the output CSV file.")
     parser.add_argument("--num_rounds", type=str, required=True, help="Comma-separated list of num_rounds values.")
     parser.add_argument("--epochs", type=str, required=True, help="Comma-separated list of epochs values.")
@@ -108,6 +104,9 @@ def parse_arguments():
 if __name__ == "__main__":
     args = parse_arguments()
 
+    num_clients = int(args.num_clients)
+    csv_file = args.csv_file
+
     # Convert comma-separated string arguments to lists of integers
     num_rounds_array = [int(x) for x in args.num_rounds.split(",")]
     epochs_array = [int(x) for x in args.epochs.split(",")]
@@ -117,8 +116,8 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
-    with open(args.csv_file, "w", newline="") as csvfile:
-        fieldnames = ["Number of Rounds", "Number of Epochs", "Number of Data Poisoned Clients", 
+    with open(csv_file, "w", newline="") as csvfile:
+        fieldnames = ["Number of Clients", "Number of Rounds", "Number of Epochs", "Number of Data Poisoned Clients", 
                       "Number of Model Poisoned Clients", "Scale Factor", "Round", "Global Accuracy"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
@@ -126,15 +125,22 @@ if __name__ == "__main__":
         for num_data_poisoned_clients in num_data_poisoned_clients_array:
             # Load data for all clients
             data = []
-            for client_id in range(NUM_CLIENTS): 
-                current_data, _ = load_data(client_id, NUM_CLIENTS, (client_id < num_data_poisoned_clients))
+            for client_id in range(num_clients): 
+                current_data, _ = load_data(client_id, num_clients, (client_id < num_data_poisoned_clients))
                 data.append(current_data)
 
             for num_model_poisoned_clients in num_model_poisoned_clients_array:
                 for scale_factor in scale_factor_array:
                     for num_rounds in num_rounds_array:
                         for epochs in epochs_array:
-                            train_and_evaluate(num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor)
+                            train_and_evaluate(num_clients=num_clients, 
+                                               num_rounds=num_rounds, 
+                                               epochs=epochs, 
+                                               data=data, 
+                                               writer=writer, 
+                                               num_data_poisoned_clients=num_data_poisoned_clients, 
+                                               num_model_poisoned_clients=num_model_poisoned_clients, 
+                                               scale_factor=scale_factor)
 
     end_time = time.time()
     elapsed_time = end_time - start_time
