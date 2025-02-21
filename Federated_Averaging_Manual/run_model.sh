@@ -2,7 +2,7 @@
 
 # Define arguments
 NUM_CLIENTS="10"
-CSV_FILE="results/test.csv"
+CSV_FILE="results/model_data_poison_10_clients.csv"
 NUM_ROUNDS="70"
 EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0,1,2,3,4,5,6,7"

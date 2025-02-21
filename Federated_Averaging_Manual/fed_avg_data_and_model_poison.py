@@ -116,6 +116,16 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
+    # Print all parameters
+    print("Parameters:")
+    print(f"Number of Clients: {num_clients}")
+    print(f"CSV File: {csv_file}")
+    print(f"Number of Rounds: {num_rounds_array}")
+    print(f"Epochs: {epochs_array}")
+    print(f"Number of Data Poisoned Clients: {num_data_poisoned_clients_array}")
+    print(f"Number of Model Poisoned Clients: {num_model_poisoned_clients_array}")
+    print(f"Scale Factor: {scale_factor_array}")
+
     with open(csv_file, "w", newline="") as csvfile:
         fieldnames = ["Number of Clients", "Number of Rounds", "Number of Epochs", "Number of Data Poisoned Clients", 
                       "Number of Model Poisoned Clients", "Scale Factor", "Round", "Global Accuracy"]
@@ -147,4 +157,4 @@ if __name__ == "__main__":
 
     print(f"Start time: {time.ctime(start_time)}, End time: {time.ctime(end_time)}")
     print(f"Elapsed time: {time.strftime('%d days, %H Hours %M Minutes %S Seconds', time.gmtime(elapsed_time))}")
-    print("Federated training with data poisoning completed. Results saved in results/temp.csv.")
+    print(f"Federated training completed. Results saved in {csv_file}")
