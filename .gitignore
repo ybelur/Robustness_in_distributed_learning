@@ -9,4 +9,8 @@ __pycache__/
 .vscode/
 .idea/
 
+# Ignore PBS Pro job files
 job_output_files/
+
+# Ignore run.job files
+run_job*
