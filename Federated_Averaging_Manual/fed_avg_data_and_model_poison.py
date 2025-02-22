@@ -32,7 +32,7 @@ def poison_model_weights(model_weights, scale_factor):
 
 def train_client(global_model, data, client_id, epochs, num_model_poisoned_clients, scale_factor):
     """Train the local model on a specific client, with optional data poisoning."""
-   
+
     print(f"Training on client {client_id + 1}...")
     
     # Create a copy of the global model for this client
@@ -151,6 +151,8 @@ if __name__ == "__main__":
                                                num_data_poisoned_clients=num_data_poisoned_clients, 
                                                num_model_poisoned_clients=num_model_poisoned_clients, 
                                                scale_factor=scale_factor)
+
+    csvfile.close()
 
     end_time = time.time()
     elapsed_time = end_time - start_time
