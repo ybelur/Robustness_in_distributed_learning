@@ -13,14 +13,23 @@ from task import Net, load_data, train, test, get_weights, set_weights
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Training on {DEVICE}")
 
-def federated_avg(weights_list):
+def federated_avg(weights_list, aggregation_type):
     """Compute federated averaging of model weights."""
-    avg_weights = copy.deepcopy(weights_list[0])
-    for key in avg_weights.keys():
-        for i in range(1, len(weights_list)):
-            avg_weights[key] += weights_list[i][key]
-        avg_weights[key] = avg_weights[key] / len(weights_list)
-    return avg_weights
+
+    if aggregation_type == "mean":
+        avg_weights = copy.deepcopy(weights_list[0])
+        for key in avg_weights.keys():
+            for i in range(1, len(weights_list)):
+                avg_weights[key] += weights_list[i][key]
+            avg_weights[key] = avg_weights[key] / len(weights_list)
+        return avg_weights
+    
+    elif aggregation_type == "median":
+        avg_weights = copy.deepcopy(weights_list[0])
+        for key in avg_weights.keys():
+            weights = [weights_list[i][key] for i in range(len(weights_list))]
+            avg_weights[key] = np.median(weights, axis=0)
+        return avg_weights
 
 def poison_model_weights(model_weights, scale_factor):
     """Introduce model poisoning by modifying the weights drastically."""
@@ -49,11 +58,11 @@ def train_client(global_model, data, client_id, epochs, num_model_poisoned_clien
         return local_model.state_dict(), train_loss
 
 
-def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor):
+def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor, aggregation_type):
     """Simulate federated learning across multiple clients in parallel."""
 
-    print("Training with these parameters:")
-    print(f"Number of Clients: {num_clients}, Number of Rounds: {num_rounds}, Number of Epochs: {epochs}, Number of Data Poisoned Clients: {num_data_poisoned_clients}, Number of Model Poisoned Clients: {num_model_poisoned_clients}, Scale Factor: {scale_factor}")
+    print("Now Training with these parameters:")
+    print(f"Number of Clients: {num_clients}, Number of Rounds: {num_rounds}, Number of Epochs: {epochs}, Number of Data Poisoned Clients: {num_data_poisoned_clients}, Number of Model Poisoned Clients: {num_model_poisoned_clients}, Scale Factor: {scale_factor}, Aggregation Type: {aggregation_type}")
 
     global_model = Net().to(DEVICE)
 
@@ -76,7 +85,7 @@ def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_p
                 local_losses.append(loss)
 
         # Federated averaging
-        avg_weights = federated_avg(local_weights)
+        avg_weights = federated_avg(local_weights, aggregation_type)
         global_model.load_state_dict(avg_weights)
         
         # Test the global model
@@ -86,7 +95,13 @@ def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_p
         print(f"Round {rnd + 1} results: avg loss = {avg_loss:.4f}, global accuracy = {global_accuracy:.4f}")
 
         # Write round results to CSV        
-        writer.writerow({"Number of Clients": num_clients, "Number of Rounds": num_rounds, "Number of Epochs": epochs, "Number of Data Poisoned Clients": num_data_poisoned_clients, "Number of Model Poisoned Clients": num_model_poisoned_clients, "Scale Factor": scale_factor, "Round": rnd + 1, "Global Accuracy": global_accuracy})
+        writer.writerow({"Number of Clients": num_clients, "Number of Rounds": num_rounds, 
+                         "Number of Epochs": epochs, "Number of Data Poisoned Clients": num_data_poisoned_clients, 
+                         "Number of Model Poisoned Clients": num_model_poisoned_clients, 
+                         "Scale Factor": scale_factor, "Aggregation Type": aggregation_type, 
+                         "Round": rnd + 1, "Global Accuracy": global_accuracy})
+        
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Run federated training with data poisoning.")
@@ -98,6 +113,7 @@ def parse_arguments():
     parser.add_argument("--num_data_poisoned_clients", type=str, required=True, help="Comma-separated list of num_data_poisoned_clients values.")
     parser.add_argument("--scale_factor", type=str, required=True, help="Comma-separated list of scale_factor values.")
     parser.add_argument("--num_model_poisoned_clients", type=str, required=True, help="Comma-separated list of num_model_poisoned_clients values.")
+    parser.add_argument("--aggregation_type", type=str, required=True, help="Aggregation type for federated averaging.")
 
     return parser.parse_args()
 
@@ -106,6 +122,7 @@ if __name__ == "__main__":
 
     num_clients = int(args.num_clients)
     csv_file = args.csv_file
+    aggregation_type = args.aggregation_type
 
     # Convert comma-separated string arguments to lists of integers
     num_rounds_array = [int(x) for x in args.num_rounds.split(",")]
@@ -125,10 +142,16 @@ if __name__ == "__main__":
     print(f"Number of Data Poisoned Clients: {num_data_poisoned_clients_array}")
     print(f"Number of Model Poisoned Clients: {num_model_poisoned_clients_array}")
     print(f"Scale Factor: {scale_factor_array}")
+    print(f"Aggregation Type: {aggregation_type}")
+    print("\n")
 
     with open(csv_file, "w", newline="") as csvfile:
-        fieldnames = ["Number of Clients", "Number of Rounds", "Number of Epochs", "Number of Data Poisoned Clients", 
-                      "Number of Model Poisoned Clients", "Scale Factor", "Round", "Global Accuracy"]
+        fieldnames = ["Number of Clients", "Number of Rounds",
+                      "Number of Epochs", "Number of Data Poisoned Clients",
+                      "Number of Model Poisoned Clients",
+                      "Scale Factor", "Aggregation Type", 
+                      "Round", "Global Accuracy"]
+        
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -150,7 +173,8 @@ if __name__ == "__main__":
                                                writer=writer, 
                                                num_data_poisoned_clients=num_data_poisoned_clients, 
                                                num_model_poisoned_clients=num_model_poisoned_clients, 
-                                               scale_factor=scale_factor)
+                                               scale_factor=scale_factor,
+                                               aggregation_type=aggregation_type)
 
     csvfile.close()
 
