@@ -1,0 +1,12 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
+
+job_output_files/

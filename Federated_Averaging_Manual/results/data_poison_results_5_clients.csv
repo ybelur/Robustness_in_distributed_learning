@@ -1,4 +1,4 @@
-Number of Rounds,Number of Epochs,Number of Poisoned Clients,Round,Global Accuracy
+Number of Rounds,Number of Epochs,Number of Data Poisoned Clients,Round,Global Accuracy
 50,4,0,1,0.103
 50,4,0,2,0.1965
 50,4,0,3,0.274
