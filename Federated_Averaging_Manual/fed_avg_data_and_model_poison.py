@@ -15,7 +15,6 @@ print(f"Training on {DEVICE}")
 
 def federated_avg(weights_list, aggregation_type):
     """Compute federated averaging of model weights."""
-
     if aggregation_type == "mean":
         avg_weights = copy.deepcopy(weights_list[0])
         for key in avg_weights.keys():
@@ -25,11 +24,18 @@ def federated_avg(weights_list, aggregation_type):
         return avg_weights
     
     elif aggregation_type == "median":
-        avg_weights = copy.deepcopy(weights_list[0])
-        for key in avg_weights.keys():
-            weights = [weights_list[i][key] for i in range(len(weights_list))]
-            avg_weights[key] = np.median(weights, axis=0)
-        return avg_weights
+        median_weights = copy.deepcopy(weights_list[0])
+        for key in median_weights.keys():
+            for i in range(1, len(weights_list)):
+                # Stack all weights for a specific key
+                stacked_weights = torch.stack([weights_list[i][key] for i in range(len(weights_list))])
+                # Compute the median of the stacked weights
+                median_weights[key] = torch.median(stacked_weights, dim=0).values
+                
+        return median_weights
+    
+    else:
+        raise ValueError("Unsupported aggregation type.")
 
 def poison_model_weights(model_weights, scale_factor):
     """Introduce model poisoning by modifying the weights drastically."""
