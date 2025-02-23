@@ -28,7 +28,7 @@ def federated_avg(weights_list, aggregation_type):
         median_weights = copy.deepcopy(weights_list[0])
         for key in median_weights.keys():
             stacked_weights = torch.stack([w[key] for w in weights_list])  # Stack all weights once
-            median_weights[key] = torch.median(stacked_weights, dim=0).values  # Compute median once
+            median_weights[key] = torch.median(stacked_weights, dim=0)[0]  # Compute median once
         return median_weights
     
     else:
