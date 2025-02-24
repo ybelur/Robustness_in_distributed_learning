@@ -31,6 +31,17 @@ def federated_avg(weights_list, aggregation_type):
             median_weights[key] = torch.median(stacked_weights, dim=0)[0]  # Compute median once
         return median_weights
     
+    elif aggregation_type == "trimmed_mean":
+        trimmed_mean_weights = copy.deepcopy(weights_list[0])
+        trim_ratio = 0.1  # Define the trim ratio (10% trimming)
+        for key in trimmed_mean_weights.keys():
+            stacked_weights = torch.stack([w[key] for w in weights_list])
+            sorted_weights, _ = torch.sort(stacked_weights, dim=0)
+            trim_count = int(trim_ratio * len(weights_list))
+            trimmed_weights = sorted_weights[trim_count:-trim_count]  # Trim the extremes
+            trimmed_mean_weights[key] = torch.mean(trimmed_weights, dim=0)
+        return trimmed_mean_weights
+
     else:
         raise ValueError("Unsupported aggregation type.")
 
