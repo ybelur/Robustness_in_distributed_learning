@@ -33,7 +33,7 @@ def federated_avg(weights_list, aggregation_type):
     
     elif aggregation_type == "trimmed_mean":
         trimmed_mean_weights = copy.deepcopy(weights_list[0])
-        trim_ratio = 0.1  # Define the trim ratio (10% trimming)
+        trim_ratio = 0.2  # Define the trim ratio (10% trimming)
         for key in trimmed_mean_weights.keys():
             stacked_weights = torch.stack([w[key] for w in weights_list])
             sorted_weights, _ = torch.sort(stacked_weights, dim=0)

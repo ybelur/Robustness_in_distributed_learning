@@ -3,7 +3,7 @@
 # Define arguments
 NUM_CLIENTS="10"
 CSV_FILE="results/trimmed_mean_model_poison.csv"
-NUM_ROUNDS="70"
+NUM_ROUNDS="50"
 EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
 SCALE_FACTOR="5"
