@@ -2,13 +2,13 @@
 
 # Define arguments
 NUM_CLIENTS="10"
-CSV_FILE="results/trimmed_mean_model_poison.csv"
+CSV_FILE="results/median_model_poison_cx3.csv"
 NUM_ROUNDS="50"
 EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
 SCALE_FACTOR="5"
 NUM_MODEL_POISONED_CLIENTS="0,1,2,3,4,5,6,7,8,9,10"
-AGGREGATION_TYPE="trimmed_mean"
+AGGREGATION_TYPE="median"
 
 # Run the Python script with the arguments
 python fed_avg_data_and_model_poison.py \
