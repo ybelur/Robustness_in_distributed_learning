@@ -2,7 +2,7 @@
 
 # Define arguments
 NUM_CLIENTS="10"
-CSV_FILE="results/krum.csv"
+CSV_FILE="results/weighted_mean_data_poison_7_cx3.csv"
 NUM_ROUNDS="50"
 EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
