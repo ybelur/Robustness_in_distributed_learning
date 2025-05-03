@@ -12,7 +12,9 @@ file_paths = [
     "../results/weighted_mean_data_poison/weighted_mean_data_poison_4_cx3.csv",
     "../results/weighted_mean_data_poison/weighted_mean_data_poison_5_cx3.csv",
     "../results/weighted_mean_data_poison/weighted_mean_data_poison_6_cx3.csv",
-    "../results/weighted_mean_data_poison/weighted_mean_data_poison_7_cx3.csv"
+    "../results/weighted_mean_data_poison/weighted_mean_data_poison_7_cx3.csv",
+    "../results/weighted_mean_data_poison/weighted_mean_data_poison_8_cx3.csv",
+    "../results/weighted_mean_data_poison/weighted_mean_data_poison_9_cx3.csv"
 ]
 
 # Combine all data into a single DataFrame with moving averages
@@ -40,7 +42,7 @@ sns.lineplot(
     marker='o'
 )
 
-plt.title('Moving Average of Global Accuracy vs Round for Different Poison Levels')
+plt.title('Moving Average of Global Accuracy vs Rounds over several Trials')
 plt.xlabel('Round')
 plt.ylabel('Global Accuracy (Moving Average)')
 plt.grid(True)
