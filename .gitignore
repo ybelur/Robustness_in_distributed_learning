@@ -13,3 +13,4 @@ __pycache__/
 job_output_files/
 
 # Ignore run.job files
+run_job*
