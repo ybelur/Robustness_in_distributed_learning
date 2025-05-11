@@ -235,7 +235,7 @@ if __name__ == "__main__":
             data = []
 
             # Assign probabilities for each client being data poisoned
-            probabilities = np.random.rand(num_clients);
+            probabilities = np.random.rand(num_clients) * 0.75
             # probabilities = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
             rand_array = np.random.rand(10)
