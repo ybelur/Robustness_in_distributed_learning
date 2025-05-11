@@ -13,22 +13,55 @@ from task import Net, load_data, train, test, get_weights, set_weights
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Training on {DEVICE}")
 
-def federated_avg(weights_list, aggregation_type):
+
+def federated_avg(weights_list, aggregation_type, poison_probabilities):
     """Compute federated averaging of model weights."""
+
     if aggregation_type == "mean":
         avg_weights = copy.deepcopy(weights_list[0])
         for key in avg_weights.keys():
             for i in range(1, len(weights_list)):
-                avg_weights[key] += weights_list[i][key]
+                avg_weights[key] += weights_list[i][key]  
             avg_weights[key] = avg_weights[key] / len(weights_list)
         return avg_weights
     
+    elif aggregation_type == "weighted_mean":
+        probability_weights = [1 - p for p in poison_probabilities]
+        total_weight = sum(probability_weights)
+
+        avg_weights = copy.deepcopy(weights_list[0])
+
+        for key in avg_weights.keys():
+            avg_weights[key] = torch.zeros_like(avg_weights[key])
+            for i in range(len(weights_list)):
+                avg_weights[key] += weights_list[i][key] * (probability_weights[i])
+            avg_weights[key] = avg_weights[key] / total_weight
+        return avg_weights
+    
+    elif aggregation_type == "dropout_mean":
+        avg_weights = copy.deepcopy(weights_list[0])
+        valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.5]
+
+        print(f"Initial Weights: {len(weights_list)}")
+        print(f"Valid Weights: {len(valid_weights)}")
+        
+        if not valid_weights:
+            raise ValueError("No valid clients with probability <= 0.5 for aggregation.")
+        
+        for key in avg_weights.keys():
+            avg_weights[key] = torch.zeros_like(avg_weights[key])
+            for weights in valid_weights:
+                avg_weights[key] += weights[key]
+                
+            avg_weights[key] = avg_weights[key] / len(valid_weights)
+        
+        return avg_weights
     
     elif aggregation_type == "median":
         median_weights = copy.deepcopy(weights_list[0])
         for key in median_weights.keys():
-            stacked_weights = torch.stack([w[key] for w in weights_list])  # Stack all weights once
-            median_weights[key] = torch.median(stacked_weights, dim=0).values    # Compute median once
+            stacked_weights = torch.stack([w[key] for w in weights_list])
+            median_weights[key] = torch.median(stacked_weights, dim=0).values  # Compute element-wise median
         return median_weights
     
     elif aggregation_type == "trimmed_mean":
@@ -41,12 +74,40 @@ def federated_avg(weights_list, aggregation_type):
             trimmed_weights = sorted_weights[trim_count:-trim_count]  # Trim the extremes
             trimmed_mean_weights[key] = torch.mean(trimmed_weights, dim=0)
         return trimmed_mean_weights
+    
+    elif aggregation_type == "krum":
+        # Krum selects the update closest to the majority of other updates, tolerating up to num_byzantine Byzantine clients.
+        n = len(weights_list)
+        m = n - 0 - 2
+        # compute pairwise squared distances
+        distances = np.zeros((n, n))
+        for i in range(n):
+            for j in range(i+1, n):
+                dist_ij = 0.0
+                for key in weights_list[i].keys():
+                    diff = weights_list[i][key] - weights_list[j][key]
+                    dist_ij += torch.sum(diff * diff).item()
+                distances[i, j] = distances[j, i] = dist_ij
+        # score each update by summing its m smallest distances to others
+        scores = []
+        for i in range(n):
+            sorted_d = np.sort(distances[i])
+            # skip the zero distance to self (first element)
+            score = np.sum(sorted_d[1:m+1])
+            scores.append(score)
+        # choose index with minimal score
+        krum_index = int(np.argmin(scores))
+        print(f"Krum selected client {krum_index + 1} update.")
+        return weights_list[krum_index]
+
 
     else:
         raise ValueError("Unsupported aggregation type.")
 
+
 def poison_model_weights(model_weights, scale_factor):
     """Introduce model poisoning by modifying the weights drastically."""
+    
     poisoned_weights = copy.deepcopy(model_weights)
     for key in poisoned_weights.keys():
         poisoned_weights[key] = poisoned_weights[key] * scale_factor
@@ -72,7 +133,7 @@ def train_client(global_model, data, client_id, epochs, num_model_poisoned_clien
         return local_model.state_dict(), train_loss
 
 
-def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor, aggregation_type):
+def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor, aggregation_type, poison_probabilities):
     """Simulate federated learning across multiple clients in parallel."""
 
     print("Now Training with these parameters:")
@@ -99,7 +160,7 @@ def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_p
                 local_losses.append(loss)
 
         # Federated averaging
-        avg_weights = federated_avg(local_weights, aggregation_type)
+        avg_weights = federated_avg(local_weights, aggregation_type, poison_probabilities)
         global_model.load_state_dict(avg_weights)
         
         # Test the global model
@@ -172,23 +233,41 @@ if __name__ == "__main__":
         for num_data_poisoned_clients in num_data_poisoned_clients_array:
             # Load data for all clients
             data = []
-            for client_id in range(num_clients): 
-                current_data, _ = load_data(client_id, num_clients, (client_id < num_data_poisoned_clients))
+
+            # Assign probabilities for each client being data poisoned
+            probabilities = np.random.rand(num_clients);
+            # probabilities = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+            rand_array = np.random.rand(10)
+            
+            # Based on the probabilities, determine which clients are data poisoned
+            is_data_poisoned = rand_array < probabilities
+            
+
+            for client_id in range(num_clients):
+                
+                print(f"Random Array: {rand_array[client_id]}")
+                print(f"Client {client_id + 1} probabilities: {probabilities[client_id]}")
+                print(f"Client {client_id + 1} data poisoned: {is_data_poisoned[client_id]}")
+
+                # current_data, _ = load_data(client_id, num_clients, (client_id < num_data_poisoned_clients))
+                current_data, _ = load_data(client_id, num_clients, is_data_poisoned[client_id])
                 data.append(current_data)
 
             for num_model_poisoned_clients in num_model_poisoned_clients_array:
                 for scale_factor in scale_factor_array:
                     for num_rounds in num_rounds_array:
                         for epochs in epochs_array:
-                            train_and_evaluate(num_clients=num_clients, 
-                                               num_rounds=num_rounds, 
-                                               epochs=epochs, 
-                                               data=data, 
-                                               writer=writer, 
-                                               num_data_poisoned_clients=num_data_poisoned_clients, 
-                                               num_model_poisoned_clients=num_model_poisoned_clients, 
-                                               scale_factor=scale_factor,
-                                               aggregation_type=aggregation_type)
+                            train_and_evaluate( num_clients=num_clients, 
+                                                num_rounds=num_rounds, 
+                                                epochs=epochs, 
+                                                data=data, 
+                                                writer=writer, 
+                                                num_data_poisoned_clients=num_data_poisoned_clients, 
+                                                num_model_poisoned_clients=num_model_poisoned_clients, 
+                                                scale_factor=scale_factor,
+                                                aggregation_type=aggregation_type,
+                                                poison_probabilities=probabilities)
 
     csvfile.close()
 

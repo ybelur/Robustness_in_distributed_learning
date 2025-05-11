@@ -43,9 +43,9 @@ sns.lineplot(
     marker='o'
 )
 
-plt.title('Moving Average of Global Accuracy vs Round over several Trials')
+plt.title('Moving Average of Global Accuracy vs Round over several Trials (Mean Data Poisoning)')
 plt.xlabel('Round')
 plt.ylabel('Global Accuracy (Moving Average)')
 plt.grid(True)
 plt.tight_layout()
-plt.savefig("../figures/mean_data_poison_combined.png", dpi=300)
+plt.savefig("../figures/mean_data_poison_prob_combined.png", dpi=300)

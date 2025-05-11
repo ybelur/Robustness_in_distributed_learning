@@ -42,7 +42,7 @@ sns.lineplot(
     marker='o'
 )
 
-plt.title('Moving Average of Global Accuracy vs Rounds over several Trials')
+plt.title('Moving Average of Global Accuracy vs Rounds over several Trials (Weighted Mean Data Poisoning)')
 plt.xlabel('Round')
 plt.ylabel('Global Accuracy (Moving Average)')
 plt.grid(True)

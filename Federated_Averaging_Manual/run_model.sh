@@ -2,16 +2,16 @@
 
 # Define arguments
 NUM_CLIENTS="10"
-CSV_FILE="results/dropout_mean_data_poison_0_cx3.csv"
+CSV_FILE="results/test.csv"
 NUM_ROUNDS="50"
 EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
 SCALE_FACTOR="5"
 NUM_MODEL_POISONED_CLIENTS="0"
-AGGREGATION_TYPE="dropout_mean"
+AGGREGATION_TYPE="weighted_mean"
 
 # Run the Python script with the arguments
-python -u fed_avg_data_and_model_poison.py \
+python -u fed_avg_data_and_model_poison_prob.py \
     --num_clients $NUM_CLIENTS \
     --csv_file $CSV_FILE \
     --num_rounds $NUM_ROUNDS \
