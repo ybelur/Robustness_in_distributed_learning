@@ -13,7 +13,7 @@ module load Python/3.11.3-GCCcore-12.3.0
 
 # Fixed arguments
 NUM_CLIENTS="10"
-NUM_ROUNDS="50"
+NUM_ROUNDS="40"
 EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
 SCALE_FACTOR="5"
@@ -24,7 +24,7 @@ AGGREGATION_TYPE="dropout_mean"
 NUM_RUNS=5
 
 # Loop to run the script multiple times with different output files
-for i in $(seq 1 $NUM_RUNS); do
+for i in $(seq 0 $(($NUM_RUNS - 1))); do
     CSV_FILE="results/dropout_mean_data_poison_cx3_run${i}.csv"
     echo "Running iteration $i with output: $CSV_FILE"
     
