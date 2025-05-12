@@ -8,7 +8,7 @@ EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
 SCALE_FACTOR="5"
 NUM_MODEL_POISONED_CLIENTS="0"
-AGGREGATION_TYPE="mean"
+AGGREGATION_TYPE="weighted_mean"
 
 # Run the Python script with the arguments
 python -u fed_avg_model_poison_prob.py \
