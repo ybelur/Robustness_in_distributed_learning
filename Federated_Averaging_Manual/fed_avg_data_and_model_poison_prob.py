@@ -40,13 +40,13 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
     
     elif aggregation_type == "dropout_mean":
         avg_weights = copy.deepcopy(weights_list[0])
-        valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.7]
+        valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.4]
 
         print(f"Initial Weights: {len(weights_list)}")
         print(f"Valid Weights: {len(valid_weights)}")
         
         if not valid_weights:
-            raise ValueError("No valid clients with probability <= 0.7 for aggregation.")
+            raise ValueError("No valid clients with probability <= 0.4 for aggregation.")
         
         for key in avg_weights.keys():
             avg_weights[key] = torch.zeros_like(avg_weights[key])
