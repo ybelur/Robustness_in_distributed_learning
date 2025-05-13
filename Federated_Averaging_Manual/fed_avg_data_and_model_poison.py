@@ -17,18 +17,17 @@ def federated_avg(weights_list, aggregation_type):
     """Compute federated averaging of model weights."""
     if aggregation_type == "mean":
         avg_weights = copy.deepcopy(weights_list[0])
-        for key in avg_weights.keys():
+        for key in avg_weights.keys():  
             for i in range(1, len(weights_list)):
                 avg_weights[key] += weights_list[i][key]
             avg_weights[key] = avg_weights[key] / len(weights_list)
         return avg_weights
     
-    
     elif aggregation_type == "median":
         median_weights = copy.deepcopy(weights_list[0])
         for key in median_weights.keys():
-            stacked_weights = torch.stack([w[key] for w in weights_list])  # Stack all weights once
-            median_weights[key] = torch.median(stacked_weights, dim=0).values    # Compute median once
+            stacked_weights = torch.stack([w[key] for w in weights_list])
+            median_weights[key] = torch.median(stacked_weights, dim=0).values
         return median_weights
     
     elif aggregation_type == "trimmed_mean":

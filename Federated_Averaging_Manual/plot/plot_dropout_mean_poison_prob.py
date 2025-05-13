@@ -58,7 +58,7 @@ import numpy as np
 
 # List of uploaded CSV files and their corresponding poison levels
 file_paths = [
-    f"../results/dropout_mean_0.4_prob_model_poison_batch/dropout_mean_model_poison_cx3_run_{i:02d}.csv"
+    f"../results/dropout_mean_0.3_prob_model_poison_batch/dropout_mean_model_poison_cx3_run_{i:02d}.csv"
     for i in range(100)
 ]
 
@@ -95,7 +95,7 @@ plt.xlabel('Round')
 plt.ylabel('Global Accuracy (Moving Average)')
 plt.grid(True)
 plt.legend([], [], frameon=False) 
-plt.savefig("../figures/dropout_mean_0.4_model_poison_100_prob.png", dpi=300)
+plt.savefig("../figures/dropout_mean_0.3_model_poison_100_prob.png", dpi=300)
 
 # Compute and print statistics
 max_accuracies = np.array(max_accuracies)
