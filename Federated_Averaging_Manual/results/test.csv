@@ -1,5 +1,0 @@
-Number of Clients,Number of Rounds,Number of Epochs,Number of Data Poisoned Clients,Number of Model Poisoned Clients,Scale Factor,Aggregation Type,Round,Global Accuracy
-10,50,3,0,0,5,weighted_mean,1,0.078
-10,50,3,0,0,5,weighted_mean,2,0.229
-10,50,3,0,0,5,weighted_mean,3,0.297
-10,50,3,0,0,5,weighted_mean,4,0.218

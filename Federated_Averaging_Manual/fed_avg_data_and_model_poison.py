@@ -6,9 +6,15 @@ import numpy as np
 import csv
 import time
 import argparse
+import sys
+import functools
+
 
 from concurrent.futures import ThreadPoolExecutor, as_completed 
 from task import Net, load_data, train, test, get_weights, set_weights
+
+# sys.stdout = open('output.txt','wt')
+print = functools.partial(print, flush=True)
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Training on {DEVICE}")
@@ -27,7 +33,12 @@ def federated_avg(weights_list, aggregation_type):
         median_weights = copy.deepcopy(weights_list[0])
         for key in median_weights.keys():
             stacked_weights = torch.stack([w[key] for w in weights_list])
+
+            np.set_printoptions(suppress=True, precision=6)
+            # print(f"Stacked weights for key {key}: {stacked_weights}")
             median_weights[key] = torch.median(stacked_weights, dim=0).values
+            # print(f"Median weights for key {key}: {median_weights[key]}")
+
         return median_weights
     
     elif aggregation_type == "trimmed_mean":
@@ -46,10 +57,20 @@ def federated_avg(weights_list, aggregation_type):
 
 def poison_model_weights(model_weights, scale_factor):
     """Introduce model poisoning by modifying the weights drastically."""
+    # print("Weights before poisoning:")
+    # for key in model_weights.keys():
+    #     print(f"{key}: {model_weights[key]}")
+
+    # Apply a simple scaling factor to the weights
     poisoned_weights = copy.deepcopy(model_weights)
     for key in poisoned_weights.keys():
         poisoned_weights[key] = poisoned_weights[key] * scale_factor
-    print("Model poisoning applied.")
+    # print("Model poisoning applied.") 
+
+    # print("Weights after poisoning:")
+    # for key in poisoned_weights.keys():
+    #     print(f"{key}: {poisoned_weights[key]}")
+
     return poisoned_weights
 
 def train_client(global_model, data, client_id, epochs, num_model_poisoned_clients, scale_factor):
@@ -97,6 +118,13 @@ def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_p
                 local_weights.append(weights)
                 local_losses.append(loss)
 
+        # print(f"Local weights collected from clients.")
+        # # Print the local weights for debugging
+        # for i, weights in enumerate(local_weights):
+        #     print(f"Client {i + 1} weights:")
+        #     for key in weights.keys():
+        #         print(f"{key}: {weights[key]}")
+
         # Federated averaging
         avg_weights = federated_avg(local_weights, aggregation_type)
         global_model.load_state_dict(avg_weights)
@@ -131,6 +159,7 @@ def parse_arguments():
     return parser.parse_args()
 
 if __name__ == "__main__":
+
     args = parse_arguments()
 
     num_clients = int(args.num_clients)
