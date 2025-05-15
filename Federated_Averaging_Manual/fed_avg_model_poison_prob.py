@@ -34,6 +34,8 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
             median_weights[key] = torch.median(stacked_weights, dim=0).values
             # print(f"Median weights for key {key}: {median_weights[key]}")
 
+        return median_weights
+
     elif aggregation_type == "trimmed_mean":
         trimmed_mean_weights = copy.deepcopy(weights_list[0])
         trim_ratio = 0.2  # Define the trim ratio (10% trimming)
@@ -58,16 +60,16 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
             avg_weights[key] = avg_weights[key] / total_weight
         return avg_weights
     
-    
     elif aggregation_type == "dropout_mean":
         avg_weights = copy.deepcopy(weights_list[0])
-        valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.4]
+        valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.5]
 
         print(f"Initial Weights: {len(weights_list)}")
         print(f"Valid Weights: {len(valid_weights)}")
         
         if not valid_weights:
-            raise ValueError("No valid clients with probability <= 0.4 for aggregation.")
+            # If all clients are considered poisoned, return the first client's weights
+            return weights_list[0]
         
         for key in avg_weights.keys():
             avg_weights[key] = torch.zeros_like(avg_weights[key])
@@ -78,6 +80,13 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
         
         return avg_weights
     
+    # elif aggregation_type == "dropout_mean":
+    #     threshold = 0.5
+    #     indices = [i for i, p in enumerate(poison_probabilities) if p < threshold]
+    #     avg_weights = copy.deepcopy(weights_list[indices[0]])
+    #     for key in avg_weights.keys():
+    #         avg_weights[key] = sum(weights_list[i][key] for i in indices) / len(indices)
+    #     return avg_weights
     
     elif aggregation_type == "krum":
         # Krum selects the update closest to the majority of other updates, tolerating up to num_byzantine Byzantine clients.
