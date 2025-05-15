@@ -25,6 +25,26 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
             avg_weights[key] = avg_weights[key] / len(weights_list)
         return avg_weights
     
+    elif aggregation_type == "median":
+        median_weights = copy.deepcopy(weights_list[0])
+        for key in median_weights.keys():
+            stacked_weights = torch.stack([w[key] for w in weights_list])
+
+            # print(f"Stacked weights for key {key}: {stacked_weights}")
+            median_weights[key] = torch.median(stacked_weights, dim=0).values
+            # print(f"Median weights for key {key}: {median_weights[key]}")
+
+    elif aggregation_type == "trimmed_mean":
+        trimmed_mean_weights = copy.deepcopy(weights_list[0])
+        trim_ratio = 0.2  # Define the trim ratio (10% trimming)
+        for key in trimmed_mean_weights.keys():
+            stacked_weights = torch.stack([w[key] for w in weights_list])
+            sorted_weights, _ = torch.sort(stacked_weights, dim=0)
+            trim_count = int(trim_ratio * len(weights_list))
+            trimmed_weights = sorted_weights[trim_count:-trim_count]  # Trim the extremes
+            trimmed_mean_weights[key] = torch.mean(trimmed_weights, dim=0)
+        return trimmed_mean_weights
+    
     elif aggregation_type == "weighted_mean":
         probability_weights = [1 - p for p in poison_probabilities]
         total_weight = sum(probability_weights)
@@ -38,15 +58,16 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
             avg_weights[key] = avg_weights[key] / total_weight
         return avg_weights
     
+    
     elif aggregation_type == "dropout_mean":
         avg_weights = copy.deepcopy(weights_list[0])
-        valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.3]
+        valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.4]
 
         print(f"Initial Weights: {len(weights_list)}")
         print(f"Valid Weights: {len(valid_weights)}")
         
         if not valid_weights:
-            raise ValueError("No valid clients with probability <= 0.3 for aggregation.")
+            raise ValueError("No valid clients with probability <= 0.4 for aggregation.")
         
         for key in avg_weights.keys():
             avg_weights[key] = torch.zeros_like(avg_weights[key])
@@ -57,25 +78,6 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
         
         return avg_weights
     
-    elif aggregation_type == "median":
-        median_weights = copy.deepcopy(weights_list[0])
-        for key in median_weights.keys():
-            stacked_weights = torch.stack([w[key] for w in weights_list])
-
-            # print(f"Stacked weights for key {key}: {stacked_weights}")
-            median_weights[key] = torch.median(stacked_weights, dim=0).values
-            # print(f"Median weights for key {key}: {median_weights[key]}")
-    
-    elif aggregation_type == "trimmed_mean":
-        trimmed_mean_weights = copy.deepcopy(weights_list[0])
-        trim_ratio = 0.2  # Define the trim ratio (10% trimming)
-        for key in trimmed_mean_weights.keys():
-            stacked_weights = torch.stack([w[key] for w in weights_list])
-            sorted_weights, _ = torch.sort(stacked_weights, dim=0)
-            trim_count = int(trim_ratio * len(weights_list))
-            trimmed_weights = sorted_weights[trim_count:-trim_count]  # Trim the extremes
-            trimmed_mean_weights[key] = torch.mean(trimmed_weights, dim=0)
-        return trimmed_mean_weights
     
     elif aggregation_type == "krum":
         # Krum selects the update closest to the majority of other updates, tolerating up to num_byzantine Byzantine clients.
@@ -242,7 +244,7 @@ if __name__ == "__main__":
             probabilities = np.random.rand(num_clients)
             # probabilities = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-            rand_array = np.random.rand(10)
+            rand_array = np.random.rand(num_clients)
             
             # Based on the probabilities, determine which clients are data poisoned
             is_model_poisoned = rand_array < probabilities
