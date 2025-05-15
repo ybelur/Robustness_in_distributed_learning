@@ -34,7 +34,6 @@ def federated_avg(weights_list, aggregation_type):
         for key in median_weights.keys():
             stacked_weights = torch.stack([w[key] for w in weights_list])
 
-            np.set_printoptions(suppress=True, precision=6)
             # print(f"Stacked weights for key {key}: {stacked_weights}")
             median_weights[key] = torch.median(stacked_weights, dim=0).values
             # print(f"Median weights for key {key}: {median_weights[key]}")

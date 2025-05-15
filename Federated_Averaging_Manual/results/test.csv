@@ -1,0 +1,5 @@
+Number of Clients,Number of Rounds,Number of Epochs,Number of Data Poisoned Clients,Number of Model Poisoned Clients,Scale Factor,Aggregation Type,Round,Global Accuracy
+7,50,3,0,4,1000,median,1,0.10776766969909027
+7,50,3,0,4,1000,median,2,0.1245626312106368
+7,50,3,0,4,1000,median,3,0.12876137158852344
+7,50,3,0,4,1000,median,4,0.09587123862841147

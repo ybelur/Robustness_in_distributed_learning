@@ -61,8 +61,10 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
         median_weights = copy.deepcopy(weights_list[0])
         for key in median_weights.keys():
             stacked_weights = torch.stack([w[key] for w in weights_list])
-            median_weights[key] = torch.median(stacked_weights, dim=0).values  # Compute element-wise median
-        return median_weights
+
+            # print(f"Stacked weights for key {key}: {stacked_weights}")
+            median_weights[key] = torch.median(stacked_weights, dim=0).values
+            # print(f"Median weights for key {key}: {median_weights[key]}")
     
     elif aggregation_type == "trimmed_mean":
         trimmed_mean_weights = copy.deepcopy(weights_list[0])
