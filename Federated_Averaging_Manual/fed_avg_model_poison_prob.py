@@ -80,6 +80,21 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
         
         return avg_weights
     
+    elif aggregation_type == "dropout_median":
+        median_weights = copy.deepcopy(weights_list[0])
+        valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.5]
+
+        print(f"Initial Weights: {len(weights_list)}")
+        print(f"Valid Weights: {len(valid_weights)}")
+
+        if not valid_weights:
+            return weights_list[0]
+
+        for key in median_weights.keys():
+            stacked_weights = torch.stack([w[key] for w in valid_weights])
+            median_weights[key] = torch.median(stacked_weights, dim=0).values
+        return median_weights
+    
     # elif aggregation_type == "dropout_mean":
     #     threshold = 0.5
     #     indices = [i for i, p in enumerate(poison_probabilities) if p < threshold]
@@ -140,7 +155,7 @@ def train_client(global_model, data, client_id, epochs, num_model_poisoned_clien
     # Apply model poisoning if the client_id is within the number of poisoned clients
     # if client_id < num_model_poisoned_clients:
     if (is_model_poisoned[client_id] == True):
-        print(f"Client {client_id + 1} is model poisoned.")
+        # print(f"Client {client_id + 1} is model poisoned.")
         poisoned_weights = poison_model_weights(local_model.state_dict(), scale_factor)
         return poisoned_weights, train_loss
     else:

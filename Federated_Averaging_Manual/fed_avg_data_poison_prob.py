@@ -80,6 +80,21 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
         
         return avg_weights
     
+    elif aggregation_type == "dropout_median":
+        median_weights = copy.deepcopy(weights_list[0])
+        valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.5]
+
+        print(f"Initial Weights: {len(weights_list)}")
+        print(f"Valid Weights: {len(valid_weights)}")
+
+        if not valid_weights:
+            return weights_list[0]
+
+        for key in median_weights.keys():
+            stacked_weights = torch.stack([w[key] for w in valid_weights])
+            median_weights[key] = torch.median(stacked_weights, dim=0).values
+        return median_weights
+    
     # elif aggregation_type == "dropout_mean":
     #     threshold = 0.5
     #     indices = [i for i, p in enumerate(poison_probabilities) if p < threshold]
