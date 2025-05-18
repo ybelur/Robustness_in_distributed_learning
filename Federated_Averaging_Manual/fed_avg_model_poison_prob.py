@@ -117,7 +117,6 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
     else:
         raise ValueError("Unsupported aggregation type.")
 
-
 def poison_model_weights(model_weights, scale_factor):
     """Introduce model poisoning by modifying the weights drastically."""
     
