@@ -40,7 +40,7 @@ sns.lineplot(
     x="Round", 
     y="Moving Average", 
     hue="Key Label", 
-    marker="o",
+    # marker="o",
     palette="bright"
 )
 
@@ -49,5 +49,5 @@ plt.xlabel("Number of Rounds")
 plt.ylabel("Moving Average of Global Accuracy")
 plt.legend(title="Number of Poisoned Nodes", bbox_to_anchor=(1, 1), loc='upper left')
 plt.tight_layout()
-plt.savefig("../figures/median_moving_avg_data_poison_7_clients.png", dpi=300)
+plt.savefig("../figures/median/no_prob/median_moving_avg_data_poison_7_clients.png", dpi=300)
 plt.show()
