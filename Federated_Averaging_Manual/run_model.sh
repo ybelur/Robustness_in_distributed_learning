@@ -7,9 +7,9 @@ NUM_ROUNDS="50"
 EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
 SCALE_FACTOR="1000"
-NUM_MODEL_POISONED_CLIENTS="1"
+NUM_MODEL_POISONED_CLIENTS="3"
 AGGREGATION_TYPE="trimmed_mean"
-TRIM_RATIO="0.1"
+TRIM_RATIO="0.3"
 
 # Run the Python script with the arguments
 python -u fed_avg_data_and_model_poison.py \

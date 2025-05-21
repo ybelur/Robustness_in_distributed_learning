@@ -95,7 +95,7 @@ def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_p
     """Simulate federated learning across multiple clients in parallel."""
 
     print("Now Training with these parameters:")
-    print(f"Number of Clients: {num_clients}, Number of Rounds: {num_rounds}, Number of Epochs: {epochs}, Number of Data Poisoned Clients: {num_data_poisoned_clients}, Number of Model Poisoned Clients: {num_model_poisoned_clients}, Scale Factor: {scale_factor}, Aggregation Type: {aggregation_type}")
+    print(f"Number of Clients: {num_clients}, Number of Rounds: {num_rounds}, Number of Epochs: {epochs}, Number of Data Poisoned Clients: {num_data_poisoned_clients}, Number of Model Poisoned Clients: {num_model_poisoned_clients}, Scale Factor: {scale_factor}, Aggregation Type: {aggregation_type}, Trim Ratio: {trim_ratio}")
 
     global_model = Net().to(DEVICE)
 
