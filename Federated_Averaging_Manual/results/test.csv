@@ -1,8 +1,4 @@
 Number of Clients,Number of Rounds,Number of Epochs,Number of Data Poisoned Clients,Number of Model Poisoned Clients,Scale Factor,Aggregation Type,Round,Global Accuracy
-7,50,3,0,0,1000,dropout_median,1,0.10356892932120364
-7,50,3,0,0,1000,dropout_median,2,0.09587123862841147
-7,50,3,0,0,1000,dropout_median,3,0.1000699790062981
-7,50,3,0,0,1000,dropout_median,4,0.10356892932120364
-7,50,3,0,0,1000,dropout_median,5,0.09587123862841147
-7,50,3,0,0,1000,dropout_median,6,0.1000699790062981
-7,50,3,0,0,1000,dropout_median,7,0.09587123862841147
+10,50,3,0,3,1000,trimmed_mean,1,0.078
+10,50,3,0,3,1000,trimmed_mean,2,0.189
+10,50,3,0,3,1000,trimmed_mean,3,0.278

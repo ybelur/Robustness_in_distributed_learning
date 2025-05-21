@@ -1,17 +1,18 @@
 #!/bin/bash
 
 # Define arguments
-NUM_CLIENTS="7"
+NUM_CLIENTS="10"
 CSV_FILE="results/test.csv"
 NUM_ROUNDS="50"
 EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
 SCALE_FACTOR="1000"
-NUM_MODEL_POISONED_CLIENTS="0"
-AGGREGATION_TYPE="dropout_median"
+NUM_MODEL_POISONED_CLIENTS="1"
+AGGREGATION_TYPE="trimmed_mean"
+TRIM_RATIO="0.1"
 
 # Run the Python script with the arguments
-python -u fed_avg_data_poison_prob.py \
+python -u fed_avg_data_and_model_poison.py \
     --num_clients $NUM_CLIENTS \
     --csv_file $CSV_FILE \
     --num_rounds $NUM_ROUNDS \
@@ -19,4 +20,5 @@ python -u fed_avg_data_poison_prob.py \
     --num_data_poisoned_clients $NUM_DATA_POISONED_CLIENTS \
     --scale_factor $SCALE_FACTOR \
     --num_model_poisoned_clients $NUM_MODEL_POISONED_CLIENTS \
-    --aggregation_type $AGGREGATION_TYPE
+    --aggregation_type $AGGREGATION_TYPE \
+    --trim_ratio $TRIM_RATIO 

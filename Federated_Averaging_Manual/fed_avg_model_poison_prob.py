@@ -14,7 +14,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Training on {DEVICE}")
 
 
-def federated_avg(weights_list, aggregation_type, poison_probabilities):
+def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_ratio):
     """Compute federated averaging of model weights."""
 
     if aggregation_type == "mean":
@@ -38,7 +38,7 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities):
 
     elif aggregation_type == "trimmed_mean":
         trimmed_mean_weights = copy.deepcopy(weights_list[0])
-        trim_ratio = 0.2  # Define the trim ratio (10% trimming)
+        # trim_ratio = 0.2  # Define the trim ratio (10% trimming)
         for key in trimmed_mean_weights.keys():
             stacked_weights = torch.stack([w[key] for w in weights_list])
             sorted_weights, _ = torch.sort(stacked_weights, dim=0)
@@ -162,7 +162,7 @@ def train_client(global_model, data, client_id, epochs, num_model_poisoned_clien
         return local_model.state_dict(), train_loss
 
 
-def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor, aggregation_type, poison_probabilities, is_model_poisoned):
+def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_poisoned_clients, num_model_poisoned_clients, scale_factor, aggregation_type, poison_probabilities, is_model_poisoned, trim_ratio):
     """Simulate federated learning across multiple clients in parallel."""
 
     print("Now Training with these parameters:")
@@ -189,7 +189,7 @@ def train_and_evaluate(num_clients, num_rounds, epochs, data, writer, num_data_p
                 local_losses.append(loss)
 
         # Federated averaging
-        avg_weights = federated_avg(local_weights, aggregation_type, poison_probabilities)
+        avg_weights = federated_avg(local_weights, aggregation_type, poison_probabilities, trim_ratio)
         global_model.load_state_dict(avg_weights)
         
         # Test the global model
@@ -218,15 +218,18 @@ def parse_arguments():
     parser.add_argument("--scale_factor", type=str, required=True, help="Comma-separated list of scale_factor values.")
     parser.add_argument("--num_model_poisoned_clients", type=str, required=True, help="Comma-separated list of num_model_poisoned_clients values.")
     parser.add_argument("--aggregation_type", type=str, required=True, help="Aggregation type for federated averaging.")
+    parser.add_argument("--trim_ratio", type=float, default=0.1, help="Trim ratio for trimmed mean aggregation (default: 0.1).")
 
     return parser.parse_args()
 
 if __name__ == "__main__":
+
     args = parse_arguments()
 
     num_clients = int(args.num_clients)
     csv_file = args.csv_file
     aggregation_type = args.aggregation_type
+    trim_ratio = args.trim_ratio
 
     # Convert comma-separated string arguments to lists of integers
     num_rounds_array = [int(x) for x in args.num_rounds.split(",")]
@@ -247,6 +250,7 @@ if __name__ == "__main__":
     print(f"Number of Model Poisoned Clients: {num_model_poisoned_clients_array}")
     print(f"Scale Factor: {scale_factor_array}")
     print(f"Aggregation Type: {aggregation_type}")
+    print(f"Trim Ratio: {trim_ratio}")
     print("\n")
 
     with open(csv_file, "w", newline="") as csvfile:
@@ -297,7 +301,8 @@ if __name__ == "__main__":
                                                 scale_factor=scale_factor,
                                                 aggregation_type=aggregation_type,
                                                 poison_probabilities=probabilities,
-                                                is_model_poisoned=is_model_poisoned)
+                                                is_model_poisoned=is_model_poisoned,
+                                                trim_ratio=trim_ratio)
 
     csvfile.close()
 
