@@ -3,7 +3,7 @@ import pandas as pd
 import seaborn as sns
 
 # Load the data
-file_path = "../results/trimmed_mean_model_poison_10_clients_0.6.csv"
+file_path = "../results/trimmed_mean_model_poison_10_clients_0.6_serial.csv"
 data = pd.read_csv(file_path)
 
 data['Key Label'] = data['Number of Model Poisoned Clients'].apply(lambda x: f"{x} (No Model Poisoning)" if x == 0 else str(x))
