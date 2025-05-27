@@ -95,31 +95,19 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
             median_weights[key] = torch.median(stacked_weights, dim=0).values
         return median_weights
     
-    elif aggregation_type == "krum":
-        # Krum selects the update closest to the majority of other updates, tolerating up to num_byzantine Byzantine clients.
-        n = len(weights_list)
-        m = n - 0 - 2
-        # compute pairwise squared distances
-        distances = np.zeros((n, n))
-        for i in range(n):
-            for j in range(i+1, n):
-                dist_ij = 0.0
-                for key in weights_list[i].keys():
-                    diff = weights_list[i][key] - weights_list[j][key]
-                    dist_ij += torch.sum(diff * diff).item()
-                distances[i, j] = distances[j, i] = dist_ij
-        # score each update by summing its m smallest distances to others
-        scores = []
-        for i in range(n):
-            sorted_d = np.sort(distances[i])
-            # skip the zero distance to self (first element)
-            score = np.sum(sorted_d[1:m+1])
-            scores.append(score)
-        # choose index with minimal score
-        krum_index = int(np.argmin(scores))
-        print(f"Krum selected client {krum_index + 1} update.")
-        return weights_list[krum_index]
+    elif aggregation_type == "softmax_mean":
+        # Use softmax over (1 - poison_probabilities) as weights
+        prob_scores = np.array([1 - p for p in poison_probabilities])
+        # Softmax for normalized weighting
+        exp_scores = np.exp(prob_scores)
+        softmax_weights = exp_scores / np.sum(exp_scores)
 
+        avg_weights = copy.deepcopy(weights_list[0])
+        for key in avg_weights.keys():
+            avg_weights[key] = torch.zeros_like(avg_weights[key])
+            for i in range(len(weights_list)):
+                avg_weights[key] += weights_list[i][key] * softmax_weights[i]
+        return avg_weights
 
     else:
         raise ValueError("Unsupported aggregation type.")
