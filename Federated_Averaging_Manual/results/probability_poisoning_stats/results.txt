@@ -1,0 +1,75 @@
+
+10 Clients 100 Runs Mean Data Poison:
+Mean of highest global accuracies: 0.2408
+Median of highest global accuracies: 0.2487
+Standard deviation of highest global accuracies: 0.0970
+Interquartile range (IQR) of highest global accuracies: 0.1575
+
+
+10 Clients 100 Runs Mean Model Poison:
+Mean of highest global accuracies: 0.1734
+Median of highest global accuracies: 0.1712
+Standard deviation of highest global accuracies: 0.0305
+Interquartile range (IQR) of highest global accuracies: 0.0357
+
+
+10 Clients 100 Runs Weighted Mean Data Poison:
+Mean of highest global accuracies: 0.2511
+Median of highest global accuracies: 0.2680
+Standard deviation of highest global accuracies: 0.1056
+Interquartile range (IQR) of highest global accuracies: 0.1716
+
+10 Clients 100 Runs Weighted Mean Model Poison:
+Mean of highest global accuracies: 0.1898
+Median of highest global accuracies: 0.1858
+Standard deviation of highest global accuracies: 0.0436
+Interquartile range (IQR) of highest global accuracies: 0.0388
+
+10 Clients 100 Runs Dropout Mean 0.5 Threshold Data Poison:
+Mean of highest global accuracies: 0.2397
+Median of highest global accuracies: 0.2517
+Standard deviation of highest global accuracies: 0.1109
+Interquartile range (IQR) of highest global accuracies: 0.2290
+
+10 Clients 100 Runs Dropout Mean 0.4 Threshold Data Poison:
+Mean of highest global accuracies: 0.2402
+Median of highest global accuracies: 0.2515
+Standard deviation of highest global accuracies: 0.1022
+Interquartile range (IQR) of highest global accuracies: 0.2110
+
+10 Clients 100 Runs Dropout Mean 0.3 Threshold Data Poison:
+Mean of highest global accuracies: 0.2310
+Median of highest global accuracies: 0.2110
+Standard deviation of highest global accuracies: 0.1126
+Interquartile range (IQR) of highest global accuracies: 0.2233
+
+10 Clients 100 Runs Dropout Mean 0.5 Threshold Model Poison:
+Mean of highest global accuracies: 0.1918
+Median of highest global accuracies: 0.1840
+Standard deviation of highest global accuracies: 0.0480
+Interquartile range (IQR) of highest global accuracies: 0.0741
+
+10 Clients 100 Runs Dropout Mean 0.4 Threshold Model Poison:
+Mean of highest global accuracies: 0.1964
+Median of highest global accuracies: 0.1960
+Standard deviation of highest global accuracies: 0.0486
+Interquartile range (IQR) of highest global accuracies: 0.0645
+
+10 Clients 100 Runs Dropout Mean 0.3 Threshold Model Poison:
+Mean of highest global accuracies: 0.2125
+Median of highest global accuracies: 0.2190
+Standard deviation of highest global accuracies: 0.0567
+Interquartile range (IQR) of highest global accuracies: 0.0723
+
+
+7 Clients 100 Runs Dropout Mean 0.5 Threshold Data Poison:
+Mean of highest global accuracies: 0.1168
+Median of highest global accuracies: 0.1038
+Standard deviation of highest global accuracies: 0.0467
+Interquartile range (IQR) of highest global accuracies: 0.0053
+
+7 Clients 100 Runs Dropout Mean 0.5 Threshold Model Poison:
+Mean of highest global accuracies: 0.2148
+Median of highest global accuracies: 0.1583
+Standard deviation of highest global accuracies: 0.0991
+Interquartile range (IQR) of highest global accuracies: 0.1769

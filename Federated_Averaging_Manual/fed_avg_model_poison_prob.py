@@ -95,14 +95,6 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
             median_weights[key] = torch.median(stacked_weights, dim=0).values
         return median_weights
     
-    # elif aggregation_type == "dropout_mean":
-    #     threshold = 0.5
-    #     indices = [i for i, p in enumerate(poison_probabilities) if p < threshold]
-    #     avg_weights = copy.deepcopy(weights_list[indices[0]])
-    #     for key in avg_weights.keys():
-    #         avg_weights[key] = sum(weights_list[i][key] for i in indices) / len(indices)
-    #     return avg_weights
-    
     elif aggregation_type == "krum":
         # Krum selects the update closest to the majority of other updates, tolerating up to num_byzantine Byzantine clients.
         n = len(weights_list)
