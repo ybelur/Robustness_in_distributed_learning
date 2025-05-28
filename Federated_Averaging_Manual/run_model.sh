@@ -8,7 +8,7 @@ EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
 SCALE_FACTOR="5"
 NUM_MODEL_POISONED_CLIENTS="0"
-AGGREGATION_TYPE="softmax_mean"
+AGGREGATION_TYPE="dropout_mean"
 TRIM_RATIO="0.3"
 
 # Run the Python script with the arguments

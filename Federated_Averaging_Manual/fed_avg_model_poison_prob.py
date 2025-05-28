@@ -60,7 +60,7 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
             avg_weights[key] = avg_weights[key] / total_weight
         return avg_weights
     
-    elif aggregation_type == "dropout_mean":
+    elif aggregation_type == "threshold_exclude_mean":
         avg_weights = copy.deepcopy(weights_list[0])
         valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.5]
 
@@ -84,9 +84,6 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
         median_weights = copy.deepcopy(weights_list[0])
         valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.5]
 
-        print(f"Initial Weights: {len(weights_list)}")
-        print(f"Valid Weights: {len(valid_weights)}")
-
         if not valid_weights:
             return weights_list[0]
 
@@ -95,20 +92,59 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
             median_weights[key] = torch.median(stacked_weights, dim=0).values
         return median_weights
     
-    elif aggregation_type == "threshold_exclude_mean":
+    
+    elif aggregation_type == "softmax_mean":
         # Use softmax over (1 - poison_probabilities) as weights
         prob_scores = np.array([1 - p for p in poison_probabilities])
         # Softmax for normalized weighting
         exp_scores = np.exp(prob_scores)
         softmax_weights = exp_scores / np.sum(exp_scores)
-
+        print(f"Softmax Weights: {softmax_weights}")
+        print(f'Softmax Sum: {np.sum(softmax_weights)}')
         avg_weights = copy.deepcopy(weights_list[0])
         for key in avg_weights.keys():
             avg_weights[key] = torch.zeros_like(avg_weights[key])
             for i in range(len(weights_list)):
                 avg_weights[key] += weights_list[i][key] * softmax_weights[i]
         return avg_weights
+    
+    elif aggregation_type == "dropout_mean":
 
+        " Dropout mean aggregation: Drop clients the with probability of its poison probability."
+
+        avg_weights = copy.deepcopy(weights_list[0])
+        random_probs = np.random.rand(len(weights_list))
+        valid_weights = [weights_list[i] for i in range(len(weights_list)) if random_probs[i] > poison_probabilities[i]]
+
+        # print("Random Probabilities: ", random_probs)
+        # print("Poison Probabilities: ", poison_probabilities)
+        # print(f"Valid Weights Indices: ", [i for i in range(len(weights_list)) if random_probs[i] > poison_probabilities[i]])
+
+        if not valid_weights:
+            return weights_list[np.random.randint(len(weights_list))]
+        for key in avg_weights.keys():
+            avg_weights[key] = torch.zeros_like(avg_weights[key])
+            for weights in valid_weights:
+                avg_weights[key] += weights[key]
+                
+            avg_weights[key] = avg_weights[key] / len(valid_weights)
+        return avg_weights
+    
+    elif aggregation_type == "dropout_median":
+        """Dropout median aggregation: Drop clients with a probability of their poison probability."""
+        
+        median_weights = copy.deepcopy(weights_list[0])
+        random_probs = np.random.rand(len(weights_list))
+        valid_weights = [weights_list[i] for i in range(len(weights_list)) if random_probs[i] > poison_probabilities[i]]
+
+        if not valid_weights:
+            return weights_list[np.random.randint(len(weights_list))]
+
+        for key in median_weights.keys():
+            stacked_weights = torch.stack([w[key] for w in valid_weights])
+            median_weights[key] = torch.median(stacked_weights, dim=0).values
+        return median_weights
+    
     else:
         raise ValueError("Unsupported aggregation type.")
 
