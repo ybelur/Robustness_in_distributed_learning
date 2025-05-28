@@ -80,7 +80,7 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
         
         return avg_weights
     
-    elif aggregation_type == "dropout_median":
+    elif aggregation_type == "threshold_exclude_median":
         median_weights = copy.deepcopy(weights_list[0])
         valid_weights = [weights_list[i] for i in range(len(weights_list)) if poison_probabilities[i] <= 0.5]
 
@@ -95,7 +95,7 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
             median_weights[key] = torch.median(stacked_weights, dim=0).values
         return median_weights
     
-    elif aggregation_type == "softmax_mean":
+    elif aggregation_type == "threshold_exclude_mean":
         # Use softmax over (1 - poison_probabilities) as weights
         prob_scores = np.array([1 - p for p in poison_probabilities])
         # Softmax for normalized weighting

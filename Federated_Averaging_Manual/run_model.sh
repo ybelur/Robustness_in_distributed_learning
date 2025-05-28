@@ -6,13 +6,13 @@ CSV_FILE="results/test.csv"
 NUM_ROUNDS="50"
 EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
-SCALE_FACTOR="1000"
+SCALE_FACTOR="5"
 NUM_MODEL_POISONED_CLIENTS="0"
 AGGREGATION_TYPE="softmax_mean"
 TRIM_RATIO="0.3"
 
 # Run the Python script with the arguments
-python -u fed_avg_model_poison_prob.py \
+python -u fed_avg_data_poison_prob.py \
     --num_clients $NUM_CLIENTS \
     --csv_file $CSV_FILE \
     --num_rounds $NUM_ROUNDS \
