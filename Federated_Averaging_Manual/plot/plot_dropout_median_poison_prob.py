@@ -6,7 +6,7 @@ import numpy as np
 
 # List of uploaded CSV files and their corresponding poison levels
 file_paths = [
-    f"../results/dropout_median_prob_data_poison/run_{i:02d}.csv"
+    f"../results/dropout_median_prob_model_poison/run_{i:02d}.csv"
     for i in range(100)
 ]
 
@@ -35,12 +35,12 @@ sns.lineplot(
     palette='bright',
     # marker='o'
 )
-plt.title('Moving Average of Global Accuracy vs Rounds over several Trials (Dropout Median Data Poisoning)')
+plt.title('Moving Average of Global Accuracy vs Rounds over several Trials (Dropout Median Model Poisoning)')
 plt.xlabel('Round')
 plt.ylabel('Global Accuracy (Moving Average)')
 plt.grid(True)
 plt.legend([], [], frameon=False) 
-plt.savefig("../figures/dropout_median/dropout_median_prob_data_poison_100.png", dpi=300)
+plt.savefig("../figures/dropout_median/dropout_median_prob_model_poison_100.png", dpi=300)
 
 # Compute and print statistics
 max_accuracies = np.array(max_accuracies)

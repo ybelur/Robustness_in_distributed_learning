@@ -110,8 +110,6 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
     
     elif aggregation_type == "dropout_mean":
 
-        " Dropout mean aggregation: Drop clients the with probability of its poison probability."
-
         avg_weights = copy.deepcopy(weights_list[0])
         random_probs = np.random.rand(len(weights_list))
         valid_weights = [weights_list[i] for i in range(len(weights_list)) if random_probs[i] > poison_probabilities[i]]
@@ -131,7 +129,6 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
         return avg_weights
     
     elif aggregation_type == "dropout_median":
-        """Dropout median aggregation: Drop clients with a probability of their poison probability."""
         
         median_weights = copy.deepcopy(weights_list[0])
         random_probs = np.random.rand(len(weights_list))
@@ -144,6 +141,19 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
             stacked_weights = torch.stack([w[key] for w in valid_weights])
             median_weights[key] = torch.median(stacked_weights, dim=0).values
         return median_weights
+    
+    elif aggregation_type == "weighted_krum":
+        num_clients = len(weights_list)
+        vectors = [torch.cat([v.flatten() for v in w.values()]) for w in weights_list]
+        vectors = torch.stack(vectors)
+        scores = []
+        for i in range(num_clients):
+            dists = [torch.norm(vectors[i] - vectors[j])**2 for j in range(num_clients) if j != i]
+            dists = sorted(dists)[:num_clients - 2]
+            weighted_score = sum((1 - poison_probabilities[j]) * d for j, d in enumerate(dists))
+            scores.append(weighted_score)
+        selected = np.argmin(scores)
+        return copy.deepcopy(weights_list[selected])
     
     else:
         raise ValueError("Unsupported aggregation type.")

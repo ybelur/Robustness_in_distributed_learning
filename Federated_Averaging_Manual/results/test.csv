@@ -1,3 +1,6 @@
 Number of Clients,Number of Rounds,Number of Epochs,Number of Data Poisoned Clients,Number of Model Poisoned Clients,Scale Factor,Aggregation Type,Round,Global Accuracy
-10,50,3,0,0,5,dropout_median,1,0.108
-10,50,3,0,0,5,dropout_median,2,0.089
+10,50,3,0,0,5,weighted_krum,1,0.281
+10,50,3,0,0,5,weighted_krum,2,0.261
+10,50,3,0,0,5,weighted_krum,3,0.323
+10,50,3,0,0,5,weighted_krum,4,0.308
+10,50,3,0,0,5,weighted_krum,5,0.283
