@@ -8,6 +8,7 @@ Threshold Exclude Median 0.5 Data Poison 7 Clients, 0.1168, 0.1038, 0.0467, 0.00
 Softmax Mean Data Poison 10 Clients, 0.2392, 0.2542, 0.0915, 0.1350
 Dropout Mean Data Poison 10 Clients, 0.2302, 0.2226, 0.1152, 0.2138
 Dropout Median Data Poison 10 Clients, 0.1273, 0.1091, 0.0510, 0.0059
+Weighted Krum Data Poison 10 Clients, 0.1110, 0.1100, 0.0048, 0.0050
 
 Mean Model Poison 10 Clients, 0.1734, 0.1712, 0.0305, 0.0357
 Weighted Mean Model Poison 10 Clients, 0.1898, 0.1858, 0.0436, 0.0388
@@ -18,3 +19,4 @@ Threshold Exclude Median 0.5 Model Poison 7 Clients, 0.2148, 0.1583, 0.0991, 0.1
 Softmax Mean Model Poison 10 Clients, 0.1824, 0.1783, 0.0321, 0.0442
 Dropout Mean Model Poison 10 Clients, 0.1913, 0.1867, 0.0423, 0.0579
 Dropout Median Model Poison 10 Clients, 0.1555, 0.1416, 0.0499, 0.0406
+Weighted Krum Model Poisoin 10 Clients, 0.2369, 0.2820, 0.1032, 0.2139
