@@ -155,6 +155,18 @@ def federated_avg(weights_list, aggregation_type, poison_probabilities, trim_rat
         selected = np.argmin(scores)
         return copy.deepcopy(weights_list[selected])
     
+    elif aggregation_type == "bayesian_weighted":
+        num_clients = len(weights_list)
+        trust_weights = [(1 - p) for p in poison_probabilities]
+        weight_sum = sum(trust_weights)
+        avg_weights = copy.deepcopy(weights_list[0])
+        for key in avg_weights.keys():
+            avg_weights[key] = trust_weights[0] * weights_list[0][key]
+            for i in range(1, num_clients):
+                avg_weights[key] += trust_weights[i] * weights_list[i][key]
+            avg_weights[key] /= weight_sum
+        return avg_weights
+    
     else:
         raise ValueError("Unsupported aggregation type.")
 

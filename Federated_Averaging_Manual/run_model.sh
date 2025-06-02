@@ -8,7 +8,7 @@ EPOCHS="3"
 NUM_DATA_POISONED_CLIENTS="0"
 SCALE_FACTOR="5"
 NUM_MODEL_POISONED_CLIENTS="0"
-AGGREGATION_TYPE="weighted_krum"
+AGGREGATION_TYPE="bayesian_weighted"
 TRIM_RATIO="0.3"
 
 # Run the Python script with the arguments
